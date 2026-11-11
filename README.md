@@ -1,33 +1,89 @@
-# Sheet Metal Intake · Power BI
+# Sheet Metal Intake · Supplier Performance
 
-Power BI dashboard for **goods receiving of steel, stainless and aluminum sheets** in a metal fabrication shop: supplier delivery performance, quality at the dock, spend and price trends.
+A Power BI dashboard for goods receiving of steel, stainless and aluminum sheets in a metal fabrication shop. It puts price next to delivery and quality, and shows that the cheapest supplier is also the least reliable.
 
-The use case is based on **AC Metais**, a Brazilian laser-cutting and metal fabrication company. **All data is synthetic**, generated in Python.
+![Sheet metal intake: the cost of the cheapest supplier](docs/banner.png)
 
-> 📸 *Screenshots: `docs/images/` (add after opening the report in Power BI Desktop)*
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![Power BI](https://img.shields.io/badge/Power%20BI-PBIP-F2C811?logo=powerbi&logoColor=black)
+![DAX](https://img.shields.io/badge/DAX-TMDL-555555)
+[![tests](https://github.com/lucasnunesf/sheet-metal-intake-dashboard/actions/workflows/tests.yml/badge.svg)](https://github.com/lucasnunesf/sheet-metal-intake-dashboard/actions/workflows/tests.yml)
+
+| At a glance | |
+|---|---|
+| **Result** | The mill-direct source is 10–12% cheaper per kg of carbon steel but on time only 64% of the time, against 95% for the best service center. Rust problems are 3.8× more frequent in the rainy months. |
+| **My role** | I worked with BI at AC Metais, a Brazilian laser cutting and metal fabrication company. This repository rebuilds a receiving use case from that shop with synthetic data: data generator, data model, DAX, report pages, tests. |
+| **What's here** | A Power BI project (`.pbip`) written by Python: 4 tables, 12 DAX measures, 2 pages, 24 visuals. A data generator, a pandas check of the numbers, 21 automated tests, CI on every commit. |
+| **Skills** | Power BI, DAX, Power Query (M), star schema, weighted averages, supplier scorecards, TMDL / PBIR, Python (pandas), pytest, GitHub Actions |
+| **Full case** | [docs/case-study.md](docs/case-study.md) |
+
+All data is synthetic. Nothing here comes from the company.
+
+---
+
+## Results
+
+Numbers from the dataset, November 2025 to October 2026:
+
+| | |
+|---|---|
+| Receipts | 1,471 from 6 suppliers |
+| Accepted | 1,295 t · BRL 19.7M |
+| On time | 84.2% |
+| Fill rate (accepted kg ÷ ordered kg) | 97.4% |
+| Nonconformity rate | 6.0% (19 lots rejected) |
+| Carbon steel price | +8.9% from June 2026 |
+
+![Price vs reference and on-time rate by supplier](docs/scorecard.png)
+
+| Carbon steel SAE 1020 | BRL/kg | On time | Avg days late | Fill rate | Promised lead time |
+|---|---:|---:|---:|---:|---:|
+| Steel mill direct C | 7.04 | 64.4% | 9.5 | 96.0% | 21 days |
+| Steel service center B | 7.80 | 85.0% | 4.6 | 96.9% | 7 days |
+| Steel service center A | 7.96 | 94.8% | 4.9 | 98.8% | 5 days |
+
+Decision it supports: keep the cheap mill for planned, non-urgent volume, use the reliable service center for urgent jobs, and ask for better packaging and storage in the rainy season.
+
+---
 
 ## The problem
 
-Sheet metal is the main raw material of a laser-cutting shop. When a supplier is late, short or sends rusty sheets, the cutting plan breaks. Purchasing usually picks the cheapest offer without seeing the hidden cost of unreliable suppliers.
+![Before and after](docs/before-after.png)
 
-## Key findings (synthetic data, Nov 2025 – Oct 2026)
+Sheet metal is the main raw material of a laser cutting shop. Purchasing compared quotes by price per kg. Nobody tracked, in one place, whether sheets arrived on the promised date, in the ordered quantity and within spec. A late or rusty delivery broke the cutting plan, but that cost never reached the buying decision.
 
-- 1,471 receipts · 1,312 t · BRL 20.0M · on-time 84.2% · fill rate 98.6% · nonconformity rate 6.0%.
-- The **cheapest carbon-steel source** (mill direct, ~BRL 7.04/kg vs ~8.2–8.5 at service centers) is on time only **64%** of the time and delivers short more often.
-- **Surface rust** is the most common nonconformity and peaks in the **rainy season (Dec–Mar)**.
-- Carbon-steel prices rise about **9% from June 2026**.
+The dashboard answers two questions, one per page:
 
-## Dashboard
+- **Supplier performance.** Are suppliers delivering on time, complete and to spec? KPI cards (on time, fill rate, nonconformity rate, average days late), on time by supplier and by month, nonconformities by type and a supplier scorecard.
+- **Spend and price.** How much are we buying, from whom, and at what price? KPI cards (spend, tonnes, average BRL/kg, receipts), price trend by material, monthly spend, spend by supplier and a table by material and thickness with the price vs reference.
 
-**Page 1 · Supplier performance** — *Are our suppliers delivering on time, complete and to spec?*
-KPI cards (on-time %, fill rate %, nonconformity rate %, avg days late) · on-time by supplier · on-time trend · nonconformities by type · supplier scorecard.
+---
 
-**Page 2 · Spend and price** — *How much are we buying, from whom, and at what price?*
-KPI cards (spend, tonnes, avg BRL/kg, receipts) · price trend by material · monthly spend · spend by supplier · materials table with price vs reference.
+## A bug found while checking the numbers
 
-## Data model
+![A rejected lot was counted as delivered and paid](docs/rejected-lot.png)
 
-Star schema, single-direction filters, imported from one Excel file.
+The first version of the model counted every kg that arrived at the dock as delivered and paid, even when the lot was rejected and sent back to the supplier. That added 19 lots, 16.9 t and BRL 325k that never entered the stock, and pushed the fill rate from 97.4% to 98.6%.
+
+The fix is a calculated column, `accepted_kg`, that is zero for a rejected lot. Spend, fill rate, tonnes, average price and price vs reference now use it, and `tests/test_kpis.py` checks the model so the old formula cannot come back.
+
+---
+
+## How it works
+
+![Pipeline](docs/pipeline.png)
+
+| Step | What it does | Language | Output |
+|---|---|---|---|
+| `scripts/generate_data.py` | Creates receipts from 6 suppliers, each with its own lead time, reliability, price and quality. Seeded, so it always gives the same data. | Python | `data/sheet_metal_intake.xlsx` |
+| `scripts/build_pbip.py` | Describes the dashboard: tables, Power Query, relationships, DAX measures, pages and visuals. | Python | `powerbi/SheetMetalIntake.pbip` |
+| `scripts/pbip_lib.py` | Small reusable builder that writes the model in TMDL and the report in PBIR (one JSON file per page and visual). | Python | TMDL + PBIR files |
+| `scripts/validate_pbir.py` | Checks every report file against Microsoft's JSON schemas. | Python | `0 schema errors` |
+| `scripts/kpi_snapshot.py` | Computes the main numbers with pandas, using the same logic as the DAX, so they can be checked without Power BI. | Python | numbers in the terminal |
+
+### Data model
+
+Star schema, filters in one direction, imported from one Excel file.
 
 ```
  dSupplier 1 ──── * fReceipts * ──── 1 dMaterial
@@ -38,61 +94,124 @@ Star schema, single-direction filters, imported from one Excel file.
 
 | Table | Grain | Rows |
 |---|---|---|
-| `fReceipts` | one receipt (PO line delivered) | 1,471 |
+| `fReceipts` | one receipt (purchase order line delivered) | 1,471 |
 | `dSupplier` | supplier | 6 |
 | `dMaterial` | material + thickness | 26 |
 | `dCalendar` | day | 365 |
 
-Highlights:
+## Design decisions
 
-- Calculated columns for **days late** and **spend**.
-- **12 DAX measures** in display folders (volume, delivery, quality). The average price is **weighted by kg**, and the price is compared with each material's reference price:
+- **Average price weighted by kg.** A simple average of prices treats a 50 kg delivery like a 5 t one. Over the year it gives BRL 15.00/kg instead of the real 15.22.
+- **Compare each supplier with a reference price.** Stainless costs four times more than carbon steel, so BRL/kg across suppliers means nothing. Each supplier is compared with the reference price of what it delivered:
 
 ```DAX
 Price vs Reference % =
 VAR paid = [Avg Price (BRL/kg)]
 VAR reference =
     DIVIDE (
-        SUMX ( fReceipts, fReceipts[received_kg] * RELATED ( dMaterial[reference_price_brl_kg] ) ),
-        SUM ( fReceipts[received_kg] )
+        SUMX ( fReceipts, fReceipts[accepted_kg] * RELATED ( dMaterial[reference_price_brl_kg] ) ),
+        SUM ( fReceipts[accepted_kg] )
     )
 RETURN DIVIDE ( paid - reference, reference )
 ```
 
-## Report as code
+- **Delivery, quality and price in one table.** The scorecard puts on time, days late, fill rate, nonconformity, rejection and price side by side, because the decision needs all of them at once.
+- **Report as code.** The `.pbip` format is plain text, so the model and every visual can be reviewed in a pull request and rebuilt with one command.
 
-The report is a **Power BI Project (.pbip)** built by Python: semantic model in **TMDL**, report in **PBIR** (one JSON per page and visual) and a custom theme. `scripts/pbip_lib.py` is a small reusable builder; `scripts/build_pbip.py` only describes this dashboard (tables, measures, pages). Every JSON file is validated against Microsoft's official schemas.
+---
 
-## Repository
-
-```
-data/sheet_metal_intake.xlsx      synthetic data (4 sheets)
-scripts/generate_data.py          data generator (seeded, reproducible)
-scripts/pbip_lib.py               reusable TMDL + PBIR builder
-scripts/build_pbip.py             dashboard definition
-scripts/validate_pbir.py          schema validation
-powerbi/SheetMetalIntake.pbip     open this in Power BI Desktop
-docs/                             case study and screenshots
-```
-
-## How to run
+## Try it
 
 ```bash
 pip install -r requirements.txt
 python scripts/generate_data.py
 python scripts/build_pbip.py
+python scripts/kpi_snapshot.py
 ```
 
-1. Open `powerbi/SheetMetalIntake.pbip` in Power BI Desktop (Windows).
+Output:
+
+```
+1,471 receipts written to .../data/sheet_metal_intake.xlsx
+Built .../powerbi/SheetMetalIntake.pbip: 4 tables, 12 measures, 2 pages, 24 visuals
+
+Receipts                   1,471
+Accepted                   1,295 t   spend BRL 19.7M
+On time                    84.2%
+Fill rate (accepted kg)    97.4%   rejected lots: 19
+Nonconformity rate         6.0%
+Rust, rainy vs dry months  3.8x
+Carbon steel price change  +8.9% from June 2026
+
+Carbon steel, BRL/kg by supplier
+supplier
+Steel mill direct C       7.04
+Steel service center A    7.96
+Steel service center B    7.80
+```
+
+Then, on Windows:
+
+1. Open `powerbi/SheetMetalIntake.pbip` in Power BI Desktop.
 2. *Transform data → Edit parameters →* set **DataFolder** to the full path of the `data` folder, ending with `\`.
 3. *Refresh.*
 
-Optional schema check: `git clone --depth 1 https://github.com/microsoft/json-schemas.git` and `python scripts/validate_pbir.py json-schemas`.
+## Tests
 
-## Tools
+```bash
+git clone --depth 1 https://github.com/microsoft/json-schemas.git   # optional, for the schema test
+pytest
+```
 
-Python (pandas, NumPy) · Excel · Power BI Desktop · Power Query (M) · DAX · TMDL · PBIR
+```
+============================== 21 passed in 2.89s ==============================
+```
+
+| File | What it checks |
+|---|---|
+| `tests/test_data.py` | The generator gives the same file every time. Keys match. Each supplier only sells its own materials. Received never exceeds ordered. Weight matches sheet size, thickness and density. Only measurable defects lead to a rejected lot. |
+| `tests/test_model.py` | Rebuilding gives exactly the files in the repository. Every column and measure used by a visual or a DAX formula exists in the model (the JSON schemas don't check this). A broken visual is caught. All report files pass Microsoft's schemas. |
+| `tests/test_kpis.py` | Every number in this README is recomputed from the data. Rejected lots count as zero accepted kg and zero spend, in the data and in the model. |
+
+GitHub Actions runs the tests on every commit.
+
+<details>
+<summary><b>Project layout</b></summary>
+
+```
+data/sheet_metal_intake.xlsx      synthetic data (4 sheets)
+scripts/generate_data.py          data generator (seeded)
+scripts/pbip_lib.py               reusable TMDL + PBIR builder
+scripts/build_pbip.py             dashboard definition
+scripts/validate_pbir.py          schema validation
+scripts/kpi_snapshot.py           main numbers with pandas
+powerbi/SheetMetalIntake.pbip     open this in Power BI Desktop
+tests/                            data, model and number tests
+docs/                             case study and README images
+```
+
+</details>
+
+<details>
+<summary><b>Glossary</b></summary>
+
+- **Service center**: a distributor that cuts and stocks steel close to the customer. Faster, a bit more expensive than the mill.
+- **On time**: received on or before the promised date.
+- **Fill rate**: accepted kg ÷ ordered kg.
+- **Nonconformity**: a problem found at the dock (rust, thickness out of tolerance, wrong dimensions, transport damage, missing mill certificate).
+- **Mill certificate**: the document from the steel mill with the chemical and mechanical properties of the batch.
+- **SAE 1020 / AISI 304 / 5052**: common grades of carbon steel, stainless steel and aluminum.
+
+</details>
+
+---
+
+## Next steps
+
+- Read receipts from the ERP and the inspection checklist instead of the generator.
+- Add the cost of a late delivery (hours of laser idle or overtime) to the scorecard, so the cheapest supplier can be compared on total cost.
+- Alert purchasing when a supplier's on-time rate drops below a target for two months in a row.
 
 ## Author
 
-[lucasnunesf](https://github.com/lucasnunesf)
+Lucas Fernandes Nunes · [Portfolio](https://lucasnunesf.notion.site) · [GitHub](https://github.com/lucasnunesf)
