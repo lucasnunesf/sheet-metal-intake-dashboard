@@ -1,0 +1,241 @@
+table fReceipts
+	lineageTag: 4090f0ae-c300-5f65-82c0-7dae99e39d44
+
+	measure Receipts = COUNTROWS ( fReceipts )
+		formatString: #,0
+		displayFolder: 1 Volume
+		lineageTag: 76488243-684b-5d4c-bf66-e4c36c1ecfc0
+
+	measure 'Received (t)' = SUM ( fReceipts[received_kg] ) / 1000
+		formatString: #,0.0
+		displayFolder: 1 Volume
+		lineageTag: e2041c04-3b14-56ee-88bf-61518d2faad0
+
+	measure 'Spend (BRL)' = SUM ( fReceipts[spend_brl] )
+		formatString: #,0
+		displayFolder: 1 Volume
+		lineageTag: e798c703-c411-5b5b-98cd-091aeb433d83
+
+	measure 'Avg Price (BRL/kg)' =
+			-- weighted by kg, not a simple average of prices
+			DIVIDE ( [Spend (BRL)], SUM ( fReceipts[received_kg] ) )
+		formatString: #,0.00
+		displayFolder: 1 Volume
+		lineageTag: fee76c2d-851a-5598-bbb7-5906004a3cc8
+
+	measure 'On-Time %' =
+			DIVIDE (
+			    CALCULATE ( COUNTROWS ( fReceipts ), fReceipts[days_late] <= 0 ),
+			    [Receipts]
+			)
+		formatString: 0.0%
+		displayFolder: 2 Delivery
+		lineageTag: ac35058f-d76f-5bfe-a296-b62a0e3c6241
+
+	measure 'Late Receipts' = CALCULATE ( COUNTROWS ( fReceipts ), fReceipts[days_late] > 0 )
+		formatString: #,0
+		displayFolder: 2 Delivery
+		lineageTag: 2398ed12-7cbc-5891-996d-a146ece526c8
+
+	measure 'Avg Days Late' =
+			-- only receipts that arrived after the promised date
+			CALCULATE ( AVERAGE ( fReceipts[days_late] ), fReceipts[days_late] > 0 )
+		formatString: #,0.0
+		displayFolder: 2 Delivery
+		lineageTag: 20f49173-77ab-57ad-953a-27c4db46b600
+
+	measure 'Fill Rate %' = DIVIDE ( SUM ( fReceipts[received_kg] ), SUM ( fReceipts[ordered_kg] ) )
+		formatString: 0.0%
+		displayFolder: 2 Delivery
+		lineageTag: e8f63eb6-8f40-5bb9-b5d8-95d9306fcdd6
+
+	measure Nonconformities = CALCULATE ( COUNTROWS ( fReceipts ), fReceipts[nonconformity] <> "No issue" )
+		formatString: #,0
+		displayFolder: 3 Quality
+		lineageTag: 283c15c0-cf92-53fe-b7c0-9757cf3a8dca
+
+	measure 'Nonconformity Rate %' = DIVIDE ( [Nonconformities], [Receipts] )
+		formatString: 0.0%
+		displayFolder: 3 Quality
+		lineageTag: ab54edcf-f954-549d-8e7e-c699bf65bec5
+
+	measure 'Rejection Rate %' =
+			DIVIDE (
+			    CALCULATE ( COUNTROWS ( fReceipts ), fReceipts[inspection_result] = "Rejected" ),
+			    [Receipts]
+			)
+		formatString: 0.0%
+		displayFolder: 3 Quality
+		lineageTag: 9639c5f8-3458-5ab1-ba73-75630d7e0743
+
+	measure 'Price vs Reference %' =
+			-- paid price compared with the material's reference price
+			VAR paid = [Avg Price (BRL/kg)]
+			VAR reference =
+			    DIVIDE (
+			        SUMX ( fReceipts, fReceipts[received_kg] * RELATED ( dMaterial[reference_price_brl_kg] ) ),
+			        SUM ( fReceipts[received_kg] )
+			    )
+			RETURN DIVIDE ( paid - reference, reference )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: 1 Volume
+		lineageTag: bad1420a-381e-5300-8daf-994b7d552080
+
+	column receipt_id
+		dataType: string
+		lineageTag: ad942c62-76d0-5f86-891c-23baa169d5ba
+		summarizeBy: none
+		sourceColumn: receipt_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column po_number
+		dataType: string
+		lineageTag: fd548ebe-723d-5d31-aaf1-72f880eeece8
+		summarizeBy: none
+		sourceColumn: po_number
+
+		annotation SummarizationSetBy = Automatic
+
+	column po_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 80a21d76-52e7-5e58-8fcb-a78114b4d8e2
+		summarizeBy: none
+		sourceColumn: po_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_id
+		dataType: string
+		lineageTag: e0572ea8-4543-5a04-ab05-5a064564ea51
+		summarizeBy: none
+		sourceColumn: supplier_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column material_id
+		dataType: string
+		lineageTag: b6c0a271-ac21-550a-a9f9-a762192b42bb
+		summarizeBy: none
+		sourceColumn: material_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column sheet_size_mm
+		dataType: string
+		lineageTag: fcc0d44d-9200-535d-aef7-b47c028daa64
+		summarizeBy: none
+		sourceColumn: sheet_size_mm
+
+		annotation SummarizationSetBy = Automatic
+
+	column sheets_ordered
+		dataType: int64
+		formatString: #,0
+		lineageTag: 22499c94-e4f4-5124-a37e-64db38796133
+		summarizeBy: sum
+		sourceColumn: sheets_ordered
+
+		annotation SummarizationSetBy = Automatic
+
+	column sheets_received
+		dataType: int64
+		formatString: #,0
+		lineageTag: e8e11570-24e8-537f-bd5e-6b37a211e704
+		summarizeBy: sum
+		sourceColumn: sheets_received
+
+		annotation SummarizationSetBy = Automatic
+
+	column ordered_kg
+		dataType: double
+		formatString: #,0
+		lineageTag: 853b97ac-8b83-5d3e-bab6-d7db69e7003d
+		summarizeBy: sum
+		sourceColumn: ordered_kg
+
+		annotation SummarizationSetBy = Automatic
+
+	column received_kg
+		dataType: double
+		formatString: #,0
+		lineageTag: 9fd7d8b4-cce4-5b7f-b8f7-c341361d818e
+		summarizeBy: sum
+		sourceColumn: received_kg
+
+		annotation SummarizationSetBy = Automatic
+
+	column price_brl_kg
+		dataType: double
+		formatString: #,0.00
+		lineageTag: d92cc115-d865-5bf2-9f49-83617eec6005
+		summarizeBy: none
+		sourceColumn: price_brl_kg
+
+		annotation SummarizationSetBy = Automatic
+
+	column promised_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 9e759a3f-f922-5c49-a9dc-f38db3e4c894
+		summarizeBy: none
+		sourceColumn: promised_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column received_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: c714084b-1acc-57eb-971b-140a75b2f792
+		summarizeBy: none
+		sourceColumn: received_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column inspection_result
+		dataType: string
+		lineageTag: 841c31f8-ba54-5828-84da-995db3325c78
+		summarizeBy: none
+		sourceColumn: inspection_result
+
+		annotation SummarizationSetBy = Automatic
+
+	column nonconformity
+		dataType: string
+		lineageTag: 10677c9e-2c44-53f7-8e3c-acdfff695fad
+		summarizeBy: none
+		sourceColumn: nonconformity
+
+		annotation SummarizationSetBy = Automatic
+
+	column days_late =
+			INT ( fReceipts[received_date] - fReceipts[promised_date] )
+		dataType: int64
+		formatString: 0
+		lineageTag: 7068460e-b5ab-5af7-bb49-19711969b8a7
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column spend_brl =
+			fReceipts[received_kg] * fReceipts[price_brl_kg]
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 33122568-cce2-5fe0-a6f0-520135c97bd9
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fReceipts = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents(DataFolder & "sheet_metal_intake.xlsx"), null, true),
+				    Sheet = Source{[Item="fReceipts",Kind="Sheet"]}[Data],
+				    Promoted = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"receipt_id", type text}, {"po_number", type text}, {"po_date", type date}, {"supplier_id", type text}, {"material_id", type text}, {"sheet_size_mm", type text}, {"sheets_ordered", Int64.Type}, {"sheets_received", Int64.Type}, {"ordered_kg", type number}, {"received_kg", type number}, {"price_brl_kg", type number}, {"promised_date", type date}, {"received_date", type date}, {"inspection_result", type text}, {"nonconformity", type text}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table

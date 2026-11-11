@@ -1,0 +1,12 @@
+relationship 17872138-7998-5acc-9bd1-785a707217dc
+	fromColumn: fReceipts.supplier_id
+	toColumn: dSupplier.supplier_id
+
+relationship 05c88461-3162-52fd-9c3e-9b87da0d6385
+	fromColumn: fReceipts.material_id
+	toColumn: dMaterial.material_id
+
+relationship 527d6cfd-d9ff-53d3-8c09-d0577c021d73
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fReceipts.received_date
+	toColumn: dCalendar.date

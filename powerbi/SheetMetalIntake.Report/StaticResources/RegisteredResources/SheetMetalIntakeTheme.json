@@ -1,0 +1,48 @@
+{
+  "name": "Sheet Metal Intake",
+  "dataColors": [
+    "#1F6FB2",
+    "#0B2545",
+    "#8DB8E8",
+    "#E07A1F",
+    "#5FA8A0",
+    "#B8C4D6",
+    "#C8553D"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#1F2A36",
+  "tableAccent": "#1F6FB2",
+  "textClasses": {
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 10,
+      "color": "#3A4452"
+    },
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 12,
+      "color": "#1F2A36"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 26,
+      "color": "#1F2A36"
+    }
+  },
+  "visualStyles": {
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#EEF3F8"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  }
+}

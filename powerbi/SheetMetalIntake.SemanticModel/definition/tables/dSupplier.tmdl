@@ -1,0 +1,48 @@
+table dSupplier
+	lineageTag: 329c7aa2-1a56-52bf-94e3-f9c5801c1095
+
+	column supplier_id
+		dataType: string
+		lineageTag: 62a26c15-eeec-56ee-973b-398f58484587
+		summarizeBy: none
+		sourceColumn: supplier_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier
+		dataType: string
+		lineageTag: 315b6adf-46b1-5a73-ae22-91a242229c79
+		summarizeBy: none
+		sourceColumn: supplier
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_type
+		dataType: string
+		lineageTag: c87834d4-2993-5fa7-a2c4-74bcd4c7ce0f
+		summarizeBy: none
+		sourceColumn: supplier_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column promised_lead_time_days
+		dataType: int64
+		formatString: 0
+		lineageTag: 473fb16a-a895-5591-b2e0-03add011c6d0
+		summarizeBy: none
+		sourceColumn: promised_lead_time_days
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dSupplier = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents(DataFolder & "sheet_metal_intake.xlsx"), null, true),
+				    Sheet = Source{[Item="dSupplier",Kind="Sheet"]}[Data],
+				    Promoted = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"supplier_id", type text}, {"supplier", type text}, {"supplier_type", type text}, {"promised_lead_time_days", Int64.Type}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
