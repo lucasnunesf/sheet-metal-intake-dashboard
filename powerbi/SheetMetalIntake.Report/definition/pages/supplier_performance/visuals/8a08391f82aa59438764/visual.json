@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "dSupplier.supplier",
-              "nativeQueryRef": "supplier"
+              "nativeQueryRef": "supplier",
+              "displayName": "Supplier"
             },
             {
               "field": {
@@ -41,7 +42,8 @@
                 }
               },
               "queryRef": "dSupplier.supplier_type",
-              "nativeQueryRef": "supplier_type"
+              "nativeQueryRef": "supplier_type",
+              "displayName": "Type"
             },
             {
               "field": {

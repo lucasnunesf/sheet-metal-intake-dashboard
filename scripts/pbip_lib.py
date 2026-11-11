@@ -173,6 +173,36 @@ def proj(field, active=False):
     return p
 
 
+# Table headers: readable names instead of column names like week_label
+COLUMN_LABELS = {
+    "week_label": "Week", "material_description": "Material", "remnant_id": "Remnant",
+    "operation_id": "Operation", "location_id": "Location", "generated_date": "Cut on",
+    "supplier_type": "Type", "promised_lead_time_days": "Lead time (days)",
+}
+UNIT_SUFFIXES = {"_mm": " (mm)", "_m2": " (m²)", "_brl": " (BRL)", "_days": " (days)",
+                 "_kg": " (kg)", "_hours": " (h)"}
+
+
+def column_label(prop):
+    if prop in COLUMN_LABELS:
+        return COLUMN_LABELS[prop]
+    unit = next((u for s, u in UNIT_SUFFIXES.items() if prop.endswith(s)), "")
+    base = prop[: -len(next(s for s in UNIT_SUFFIXES if prop.endswith(s)))] if unit else prop
+    return base.replace("_", " ").capitalize() + unit
+
+
+def table_projection(field):
+    p = proj(field)
+    if "Column" in field:
+        p["displayName"] = column_label(field["Column"]["Property"])
+    return p
+
+
+# Room for long category names on bar charts ("Welding / boilermaking"):
+# the axis may take up to 45% of the visual width instead of the default 25%.
+WIDE_CATEGORY_AXIS = [{"properties": {"maxMarginFactor": {"expr": {"Literal": {"Value": "45L"}}}}}]
+
+
 class Style:
     def __init__(self, dark, accent, text="#1F2A36", bg="#F3F4F6", line="#DDE2E8",
                  subtitle="#BFD4EA", palette=None, panel="#FFFFFF", muted="#5B6573",
@@ -274,13 +304,15 @@ class Page:
                                 for m, c in series_colors]
         if len(ys) > 1 or y2 is not None or series is not None:
             obj["legend"] = [{"properties": {"show": lit(True), "position": lit("Top")}}]
+        if vtype == "clusteredBarChart":
+            obj["categoryAxis"] = WIDE_CATEGORY_AXIS
         obj["valueAxis"] = [{"properties": {"show": lit(False)}}] if vtype.endswith("BarChart") else \
             [{"properties": {"gridlineShow": lit(False)}}]
         return {"visualType": vtype, "query": q, "objects": obj,
                 "visualContainerObjects": self.s.container(title), "drillFilterOtherVisuals": True}
 
     def table(self, fields, title, sort=None, sort_dir="Descending"):
-        q = {"queryState": {"Values": {"projections": [proj(f) for f in fields]}}}
+        q = {"queryState": {"Values": {"projections": [table_projection(f) for f in fields]}}}
         if sort is not None:
             q["sortDefinition"] = {"sort": [{"field": sort, "direction": sort_dir}], "isDefaultSort": True}
         return {"visualType": "tableEx", "query": q,
@@ -310,14 +342,14 @@ class Page:
         self.add("title", 16, 6, 840, 72, self.textbox([
             [(title, {"fontWeight": "bold", "fontSize": "20pt", "color": self.s.text})],
             [(question, {"fontSize": "11pt", "color": self.s.subtitle})]]))
-        self.add("footer", 860, 698, 412, 20, self.textbox([
+        self.add("footer", 860, 688, 412, 32, self.textbox([
             [(footer, {"fontSize": "8pt", "color": self.s.muted})]]))
 
     def header(self, title, question, footer):
         self.add("title", 0, 0, 1280, 64, self.textbox([
             [(title, {"fontWeight": "bold", "fontSize": "20pt", "color": "#FFFFFF"})],
             [(question, {"fontSize": "11pt", "color": self.s.subtitle})]], fill=self.s.dark))
-        self.add("footer", 860, 696, 412, 22, self.textbox([
+        self.add("footer", 860, 688, 412, 32, self.textbox([
             [(footer, {"fontSize": "8pt", "color": "#7A8494"})]]))
 
 
