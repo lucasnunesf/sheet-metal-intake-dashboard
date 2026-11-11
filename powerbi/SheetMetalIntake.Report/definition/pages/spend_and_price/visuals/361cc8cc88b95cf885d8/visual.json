@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
-  "name": "3de50cc2766351c88c8a",
+  "name": "361cc8cc88b95cf885d8",
   "position": {
     "x": 238,
     "y": 80,
@@ -23,11 +23,11 @@
                       "Entity": "fReceipts"
                     }
                   },
-                  "Property": "Received (t)"
+                  "Property": "Accepted (t)"
                 }
               },
-              "queryRef": "fReceipts.Received (t)",
-              "nativeQueryRef": "Received (t)"
+              "queryRef": "fReceipts.Accepted (t)",
+              "nativeQueryRef": "Accepted (t)"
             }
           ]
         }

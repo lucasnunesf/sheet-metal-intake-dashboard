@@ -37,11 +37,11 @@
                       "Entity": "fReceipts"
                     }
                   },
-                  "Property": "Received (t)"
+                  "Property": "Accepted (t)"
                 }
               },
-              "queryRef": "fReceipts.Received (t)",
-              "nativeQueryRef": "Received (t)"
+              "queryRef": "fReceipts.Accepted (t)",
+              "nativeQueryRef": "Accepted (t)"
             },
             {
               "field": {

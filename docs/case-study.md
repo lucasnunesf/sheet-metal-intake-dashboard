@@ -18,7 +18,7 @@ Purchasing compared suppliers mainly by price per kg. Nobody tracked, in one pla
 ## What I built
 
 1. **Synthetic dataset (Python).** 1,471 receipts over 12 months from 6 suppliers, each with its own lead time, reliability, price level and quality profile; seasonal rust problems; a steel price increase from June 2026.
-2. **Star schema in Power BI.** One fact table (receipts) and three dimensions (supplier, material, calendar), with calculated columns for days late and spend.
+2. **Star schema in Power BI.** One fact table (receipts) and three dimensions (supplier, material, calendar), with calculated columns for days late, accepted kg and spend. A rejected lot goes back to the supplier, so it counts as zero accepted kg and zero spend.
 3. **12 DAX measures** for delivery (on-time %, avg days late, fill rate), quality (nonconformity and rejection rates) and cost (spend, weighted avg price, price vs reference).
 4. **Two pages, each answering one business question:**
    - *Supplier performance:* are suppliers delivering on time, complete and to spec?
@@ -27,8 +27,8 @@ Purchasing compared suppliers mainly by price per kg. Nobody tracked, in one pla
 
 ## Findings (synthetic scenario)
 
-- The mill-direct supplier is about 15% cheaper per kg but on time only 64% of the time (vs 95% for the best service center).
-- Surface rust is the main nonconformity: about 4x more frequent in the rainy season (Dec–Mar).
+- The mill-direct supplier is 10–12% cheaper per kg on carbon steel (BRL 7.04 vs 7.80–7.96) but on time only 64% of the time (vs 95% for the best service center).
+- Surface rust is the main nonconformity: 3.8x more frequent in the rainy season (Dec–Mar).
 - Carbon-steel prices rose about 9% from June 2026.
 
 **Decision it supports:** keep the cheap source for planned, non-urgent volume and use reliable service centers for urgent jobs; ask for better packaging/storage during the rainy season.
@@ -36,6 +36,7 @@ Purchasing compared suppliers mainly by price per kg. Nobody tracked, in one pla
 ## What I learned
 
 - Price per kg is a weighted average; a simple average of prices gives the wrong number.
+- A rejected lot is not a delivery. My first version counted the 19 rejected lots (16.9 t, BRL 325k) as delivered and paid, which pushed the fill rate from 97.4% to 98.6%.
 - A supplier scorecard is more useful when delivery, quality and price sit side by side in one table.
 
 ## Screenshots

@@ -60,17 +60,21 @@ TABLES = {
 CALC = {"fReceipts": [
     ("days_late", "int64", "0", None,
      ["INT ( fReceipts[received_date] - fReceipts[promised_date] )"]),
+    ("accepted_kg", "double", "#,0", None, [
+        "-- a rejected lot goes back to the supplier: it is not delivered and not paid",
+        "IF ( fReceipts[inspection_result] = \"Rejected\", 0, fReceipts[received_kg] )",
+    ]),
     ("spend_brl", "double", "#,0.00", None,
-     ["fReceipts[received_kg] * fReceipts[price_brl_kg]"]),
+     ["fReceipts[accepted_kg] * fReceipts[price_brl_kg]"]),
 ]}
 
 MEASURES = {"fReceipts": [
     ("Receipts", "1 Volume", "#,0", ["COUNTROWS ( fReceipts )"]),
-    ("Received (t)", "1 Volume", "#,0.0", ["SUM ( fReceipts[received_kg] ) / 1000"]),
+    ("Accepted (t)", "1 Volume", "#,0.0", ["SUM ( fReceipts[accepted_kg] ) / 1000"]),
     ("Spend (BRL)", "1 Volume", "#,0", ["SUM ( fReceipts[spend_brl] )"]),
     ("Avg Price (BRL/kg)", "1 Volume", "#,0.00", [
         "-- weighted by kg, not a simple average of prices",
-        "DIVIDE ( [Spend (BRL)], SUM ( fReceipts[received_kg] ) )",
+        "DIVIDE ( [Spend (BRL)], SUM ( fReceipts[accepted_kg] ) )",
     ]),
     ("On-Time %", "2 Delivery", "0.0%", [
         "DIVIDE (",
@@ -85,7 +89,7 @@ MEASURES = {"fReceipts": [
         "CALCULATE ( AVERAGE ( fReceipts[days_late] ), fReceipts[days_late] > 0 )",
     ]),
     ("Fill Rate %", "2 Delivery", "0.0%",
-     ["DIVIDE ( SUM ( fReceipts[received_kg] ), SUM ( fReceipts[ordered_kg] ) )"]),
+     ["DIVIDE ( SUM ( fReceipts[accepted_kg] ), SUM ( fReceipts[ordered_kg] ) )"]),
     ("Nonconformities", "3 Quality", "#,0",
      ["CALCULATE ( COUNTROWS ( fReceipts ), fReceipts[nonconformity] <> \"No issue\" )"]),
     ("Nonconformity Rate %", "3 Quality", "0.0%", ["DIVIDE ( [Nonconformities], [Receipts] )"]),
@@ -100,8 +104,8 @@ MEASURES = {"fReceipts": [
         "VAR paid = [Avg Price (BRL/kg)]",
         "VAR reference =",
         "    DIVIDE (",
-        "        SUMX ( fReceipts, fReceipts[received_kg] * RELATED ( dMaterial[reference_price_brl_kg] ) ),",
-        "        SUM ( fReceipts[received_kg] )",
+        "        SUMX ( fReceipts, fReceipts[accepted_kg] * RELATED ( dMaterial[reference_price_brl_kg] ) ),",
+        "        SUM ( fReceipts[accepted_kg] )",
         "    )",
         "RETURN DIVIDE ( paid - reference, reference )",
     ]),
@@ -152,7 +156,7 @@ def pages():
     p2 = Page("spend_and_price", "Spend and price", s)
     p2.header("Sheet metal intake · Spend and price",
               "How much are we buying, from whom, and at what price?", FOOT)
-    for x, name in zip(CARD_X, ["Spend (BRL)", "Received (t)", "Avg Price (BRL/kg)", "Receipts"]):
+    for x, name in zip(CARD_X, ["Spend (BRL)", "Accepted (t)", "Avg Price (BRL/kg)", "Receipts"]):
         p2.add("card " + name, x, CARD_Y, CARD_W, CARD_H, p2.card(m(name)))
     p2.add("slicer material", *SLICER_1, p2.slicer(col("dMaterial", "material"), "Material"))
     p2.add("slicer quarter", *SLICER_2, p2.slicer(col("dCalendar", "quarter"), "Quarter"))
@@ -168,7 +172,7 @@ def pages():
         "clusteredBarChart", col("dSupplier", "supplier"), m("Spend (BRL)"),
         "Where does the money go? (spend by supplier)", sort=m("Spend (BRL)"), fill=s.dark))
     p2.add("table material", 432, 448, 832, 240, p2.table(
-        [col("dMaterial", "material_description"), m("Received (t)"), m("Spend (BRL)"),
+        [col("dMaterial", "material_description"), m("Accepted (t)"), m("Spend (BRL)"),
          m("Avg Price (BRL/kg)"), m("Price vs Reference %"), m("On-Time %")],
         "What do we buy? (by material and thickness)", sort=m("Spend (BRL)")))
     return [p1, p2]
