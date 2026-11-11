@@ -13,11 +13,34 @@ A Power BI dashboard for goods receiving of steel, stainless and aluminum sheets
 |---|---|
 | **Result** | The mill-direct source is 10–12% cheaper per kg of carbon steel but on time only 64% of the time, against 95% for the best service center. Rust problems are 3.8× more frequent in the rainy months. |
 | **My role** | I worked with BI at AC Metais, a Brazilian laser cutting and metal fabrication company. This repository rebuilds a receiving use case from that shop with synthetic data: data generator, data model, DAX, report pages, tests. |
-| **What's here** | A Power BI project (`.pbip`) written by Python: 4 tables, 12 DAX measures, 2 pages, 26 visuals. A data generator, a pandas check of the numbers, 21 automated tests, CI on every commit. |
+| **What's here** | A Power BI project (`.pbip`) written by Python and published to the Power BI Service: 4 tables, 12 DAX measures, 2 pages, 26 visuals. A data generator, a pandas check of the numbers, 23 automated tests, CI on every commit. |
 | **Skills** | Power BI, DAX, Power Query (M), star schema, weighted averages, supplier scorecards, TMDL / PBIR, Python (pandas), pytest, GitHub Actions |
 | **Full case** | [docs/case-study.md](docs/case-study.md) |
 
 All data is synthetic. Nothing here comes from the company.
+
+---
+
+## The dashboard
+
+Recorded in the Power BI Service after publishing the project. Slicers and cross-filtering work on both pages.
+
+**Supplier performance.** Are suppliers delivering on time, complete and to spec? Clicking a supplier shows its own on-time, fill rate and nonconformity rate, and the scorecard puts them side by side.
+
+![Supplier performance page in use](docs/demo-supplier-performance.gif)
+
+**Spend and price.** How much are we buying, from whom, and at what price? Price by material over time, spend by month and supplier, and price vs reference by material and thickness.
+
+![Spend and price page in use](docs/demo-spend-and-price.gif)
+
+<details>
+<summary><b>Full-size screenshots</b></summary>
+
+![Supplier performance](docs/page-supplier-performance.png)
+
+![Spend and price](docs/page-spend-and-price.png)
+
+</details>
 
 ---
 
@@ -59,13 +82,21 @@ The dashboard answers two questions, one per page:
 
 ---
 
-## A bug found while checking the numbers
+## Two bugs found while checking the numbers
+
+### A rejected lot counted as delivered and paid
 
 ![A rejected lot was counted as delivered and paid](docs/rejected-lot.png)
 
 The first version of the model counted every kg that arrived at the dock as delivered and paid, even when the lot was rejected and sent back to the supplier. That added 19 lots, 16.9 t and BRL 325k that never entered the stock, and pushed the fill rate from 97.4% to 98.6%.
 
 The fix is a calculated column, `accepted_kg`, that is zero for a rejected lot. Spend, fill rate, tonnes, average price and price vs reference now use it, and `tests/test_kpis.py` checks the model so the old formula cannot come back.
+
+### A click that made the nonconformity rate 244%
+
+Recording the published report showed a second problem. Clicking "Surface rust" in the nonconformities chart made the nonconformity rate card jump to 244.4%. The measure counted nonconformities with `CALCULATE ( ..., fReceipts[nonconformity] <> "No issue" )`, and that filter replaced the click on the same column: it counted all 88 nonconformities and divided by the 36 rusty receipts.
+
+Wrapping the filter in `KEEPFILTERS` makes it intersect with the click instead of replacing it, so the rate inside one type is 100%. The same fix went into on-time, late receipts, average days late and rejection rate, and a test now fails if a measure filters a receipts column without `KEEPFILTERS`.
 
 ---
 
@@ -164,14 +195,14 @@ pytest
 ```
 
 ```
-============================== 21 passed in 2.89s ==============================
+============================== 23 passed in 2.81s ==============================
 ```
 
 | File | What it checks |
 |---|---|
 | `tests/test_data.py` | The generator gives the same file every time. Keys match. Each supplier only sells its own materials. Received never exceeds ordered. Weight matches sheet size, thickness and density. Only measurable defects lead to a rejected lot. |
 | `tests/test_model.py` | Rebuilding gives exactly the files in the repository. Every column and measure used by a visual or a DAX formula exists in the model (the JSON schemas don't check this). A broken visual is caught. All report files pass Microsoft's schemas. |
-| `tests/test_kpis.py` | Every number in this README is recomputed from the data. Rejected lots count as zero accepted kg and zero spend, in the data and in the model. |
+| `tests/test_kpis.py` | Every number in this README is recomputed from the data. Rejected lots count as zero accepted kg and zero spend, in the data and in the model. Measure filters keep the visual's filter (`KEEPFILTERS`). |
 
 GitHub Actions runs the tests on every commit.
 
