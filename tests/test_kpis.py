@@ -72,3 +72,23 @@ def test_snapshot_script_runs():
     out = subprocess.run([sys.executable, "scripts/kpi_snapshot.py"], cwd=ROOT,
                          capture_output=True, text=True, check=True).stdout
     assert "Fill rate (accepted kg)    97.4%" in out
+
+
+def test_measure_filters_keep_the_visual_filter():
+    # Clicking "Surface rust" in the nonconformity chart showed a 244.4% nonconformity
+    # rate: the measure's own filter on fReceipts[nonconformity] replaced the click,
+    # so it counted all 88 nonconformities over the 36 rusty receipts. KEEPFILTERS
+    # makes the measure filter intersect with the visual's filter instead.
+    import re
+    tables, _ = read_model(ROOT / "powerbi" / f"{NAME}.SemanticModel")
+    for name, dax in tables["fReceipts"]["measures"].items():
+        for args in re.findall(r"CALCULATE \((.*)\)", dax.replace("\n", " ")):
+            for flt in re.findall(r"fReceipts\[\w+\] *(?:<>|<=|>=|=|<|>)", args):
+                assert f"KEEPFILTERS ( {flt}" in args, f"{name}: {flt} without KEEPFILTERS"
+
+
+def test_rate_inside_one_nonconformity_type_is_100_percent(r):
+    rust = r[r.nonconformity.str.startswith("Surface rust")]
+    assert len(rust) == 36
+    assert (rust.nonconformity != "No issue").mean() == 1.0
+    assert round((r.nonconformity != "No issue").sum() / len(rust), 3) == 2.444   # the old wrong value

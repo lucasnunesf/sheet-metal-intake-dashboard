@@ -25,21 +25,21 @@ table fReceipts
 
 	measure 'On-Time %' =
 			DIVIDE (
-			    CALCULATE ( COUNTROWS ( fReceipts ), fReceipts[days_late] <= 0 ),
+			    CALCULATE ( COUNTROWS ( fReceipts ), KEEPFILTERS ( fReceipts[days_late] <= 0 ) ),
 			    [Receipts]
 			)
 		formatString: 0.0%
 		displayFolder: 2 Delivery
 		lineageTag: ac35058f-d76f-5bfe-a296-b62a0e3c6241
 
-	measure 'Late Receipts' = CALCULATE ( COUNTROWS ( fReceipts ), fReceipts[days_late] > 0 )
+	measure 'Late Receipts' = CALCULATE ( COUNTROWS ( fReceipts ), KEEPFILTERS ( fReceipts[days_late] > 0 ) )
 		formatString: #,0
 		displayFolder: 2 Delivery
 		lineageTag: 2398ed12-7cbc-5891-996d-a146ece526c8
 
 	measure 'Avg Days Late' =
 			-- only receipts that arrived after the promised date
-			CALCULATE ( AVERAGE ( fReceipts[days_late] ), fReceipts[days_late] > 0 )
+			CALCULATE ( AVERAGE ( fReceipts[days_late] ), KEEPFILTERS ( fReceipts[days_late] > 0 ) )
 		formatString: #,0.0
 		displayFolder: 2 Delivery
 		lineageTag: 20f49173-77ab-57ad-953a-27c4db46b600
@@ -49,7 +49,7 @@ table fReceipts
 		displayFolder: 2 Delivery
 		lineageTag: e8f63eb6-8f40-5bb9-b5d8-95d9306fcdd6
 
-	measure Nonconformities = CALCULATE ( COUNTROWS ( fReceipts ), fReceipts[nonconformity] <> "No issue" )
+	measure Nonconformities = CALCULATE ( COUNTROWS ( fReceipts ), KEEPFILTERS ( fReceipts[nonconformity] <> "No issue" ) )
 		formatString: #,0
 		displayFolder: 3 Quality
 		lineageTag: 283c15c0-cf92-53fe-b7c0-9757cf3a8dca
@@ -61,7 +61,7 @@ table fReceipts
 
 	measure 'Rejection Rate %' =
 			DIVIDE (
-			    CALCULATE ( COUNTROWS ( fReceipts ), fReceipts[inspection_result] = "Rejected" ),
+			    CALCULATE ( COUNTROWS ( fReceipts ), KEEPFILTERS ( fReceipts[inspection_result] = "Rejected" ) ),
 			    [Receipts]
 			)
 		formatString: 0.0%
