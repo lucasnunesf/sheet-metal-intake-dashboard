@@ -36,7 +36,7 @@ Purchasing compared suppliers mainly by price per kg. Nobody tracked, in one pla
 ## What I learned
 
 - Price per kg is a weighted average; a simple average of prices gives the wrong number.
-- A rejected lot is not a delivery. My first version counted the 19 rejected lots (16.9 t, BRL 325k) as delivered and paid, which pushed the fill rate from 97.4% to 98.6%.
+- A rejected lot is not a delivery. The 19 rejected lots (16.9 t, BRL 325k) count as zero accepted kg and zero spend; counting received kg instead would show a fill rate of 98.6% instead of 97.4%.
 - A supplier scorecard is more useful when delivery, quality and price sit side by side in one table.
 
 ## Screenshots

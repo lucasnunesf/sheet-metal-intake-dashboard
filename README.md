@@ -82,19 +82,19 @@ The dashboard answers two questions, one per page:
 
 ---
 
-## Two bugs found while checking the numbers
+## Two rules the numbers depend on
 
-### A rejected lot counted as delivered and paid
+### A rejected lot is neither delivered nor paid
 
-![A rejected lot was counted as delivered and paid](docs/rejected-lot.png)
+![A rejected lot is neither delivered nor paid](docs/rejected-lot.png)
 
-The first version of the model counted every kg that arrived at the dock as delivered and paid, even when the lot was rejected and sent back to the supplier. That added 19 lots, 16.9 t and BRL 325k that never entered the stock, and pushed the fill rate from 97.4% to 98.6%.
+A lot rejected at the dock goes back to the supplier: it never enters the stock and is not paid. So the model counts accepted kg, not received kg. A calculated column, `accepted_kg`, is zero for a rejected lot, and spend, fill rate, tonnes, average price and price vs reference all use it.
 
-The fix is a calculated column, `accepted_kg`, that is zero for a rejected lot. Spend, fill rate, tonnes, average price and price vs reference now use it, and `tests/test_kpis.py` checks the model so the old formula cannot come back.
+In this dataset that rule takes out 19 lots, 16.9 t and BRL 325k. Counting received kg instead would show a fill rate of 98.6% instead of 97.4%. `tests/test_kpis.py` checks both the data and the model, so a measure can't go back to received kg.
 
-### A click that made the nonconformity rate 244%
+### A filter inside a measure must not replace the user's click
 
-Recording the published report showed a second problem. Clicking "Surface rust" in the nonconformities chart made the nonconformity rate card jump to 244.4%. The measure counted nonconformities with `CALCULATE ( ..., fReceipts[nonconformity] <> "No issue" )`, and that filter replaced the click on the same column: it counted all 88 nonconformities and divided by the 36 rusty receipts.
+Recording the published report showed a problem with this. Clicking "Surface rust" in the nonconformities chart made the nonconformity rate card jump to 244.4%. The measure counted nonconformities with `CALCULATE ( ..., fReceipts[nonconformity] <> "No issue" )`, and that filter replaced the click on the same column: it counted all 88 nonconformities and divided by the 36 rusty receipts.
 
 Wrapping the filter in `KEEPFILTERS` makes it intersect with the click instead of replacing it, so the rate inside one type is 100%. The same fix went into on-time, late receipts, average days late and rejection rate, and a test now fails if a measure filters a receipts column without `KEEPFILTERS`.
 
