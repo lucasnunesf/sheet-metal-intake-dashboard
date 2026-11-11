@@ -13,7 +13,7 @@ A Power BI dashboard for goods receiving of steel, stainless and aluminum sheets
 |---|---|
 | **Result** | The mill-direct source is 10–12% cheaper per kg of carbon steel but on time only 64% of the time, against 95% for the best service center. Rust problems are 3.8× more frequent in the rainy months. |
 | **My role** | I worked with BI at AC Metais, a Brazilian laser cutting and metal fabrication company. This repository rebuilds a receiving use case from that shop with synthetic data: data generator, data model, DAX, report pages, tests. |
-| **What's here** | A Power BI project (`.pbip`) written by Python: 4 tables, 12 DAX measures, 2 pages, 24 visuals. A data generator, a pandas check of the numbers, 21 automated tests, CI on every commit. |
+| **What's here** | A Power BI project (`.pbip`) written by Python: 4 tables, 12 DAX measures, 2 pages, 26 visuals. A data generator, a pandas check of the numbers, 21 automated tests, CI on every commit. |
 | **Skills** | Power BI, DAX, Power Query (M), star schema, weighted averages, supplier scorecards, TMDL / PBIR, Python (pandas), pytest, GitHub Actions |
 | **Full case** | [docs/case-study.md](docs/case-study.md) |
 
@@ -133,7 +133,7 @@ Output:
 
 ```
 1,471 receipts written to .../data/sheet_metal_intake.xlsx
-Built .../powerbi/SheetMetalIntake.pbip: 4 tables, 12 measures, 2 pages, 24 visuals
+Built .../powerbi/SheetMetalIntake.pbip: 4 tables, 12 measures, 2 pages, 26 visuals
 
 Receipts                   1,471
 Accepted                   1,295 t   spend BRL 19.7M

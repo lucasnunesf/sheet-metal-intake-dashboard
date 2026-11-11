@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
   "name": "98cbb841ce155609aae5",
   "position": {
-    "x": 432,
-    "y": 186,
-    "z": 9000,
-    "height": 250,
-    "width": 404,
-    "tabOrder": 9000
+    "x": 590,
+    "y": 124,
+    "z": 10000,
+    "height": 276,
+    "width": 330,
+    "tabOrder": 10000
   },
   "visual": {
     "visualType": "lineChart",
@@ -71,30 +71,6 @@
       }
     },
     "objects": {
-      "labels": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "color": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#1F2A36'"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
       "dataPoint": [
         {
           "properties": {
@@ -140,7 +116,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Is it getting better? (on-time % by month)'"
+                  "Value": "'On-time % by month'"
                 }
               }
             },

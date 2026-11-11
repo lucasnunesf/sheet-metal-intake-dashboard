@@ -1,12 +1,12 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
-  "name": "73fdbce8c9e25cd887f7",
+  "name": "0c44da4cd5d856209deb",
   "position": {
     "x": 0,
     "y": 0,
     "z": 0,
-    "height": 64,
-    "width": 1280,
+    "height": 720,
+    "width": 232,
     "tabOrder": 0
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Sheet metal intake · Supplier performance",
+                    "value": "Sheet metal intake",
                     "textStyle": {
                       "fontWeight": "bold",
                       "fontSize": "20pt",
@@ -31,9 +31,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Are our suppliers delivering on time, complete and to spec?",
+                    "value": "Supplier performance",
                     "textStyle": {
-                      "fontSize": "11pt",
+                      "fontWeight": "bold",
+                      "fontSize": "12pt",
                       "color": "#8DB8E8"
                     }
                   }

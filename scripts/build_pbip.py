@@ -4,8 +4,7 @@ Usage:  python scripts/build_pbip.py   ->  powerbi/SheetMetalIntake.pbip
 """
 from pathlib import Path
 
-from pbip_lib import (CARD_H, CARD_W, CARD_X, CARD_Y, SLICER_1, SLICER_2, Model, Page, Style,
-                      build_project, categorical_filter, col, meas)
+from pbip_lib import Model, Page, Style, build_project, categorical_filter, col, meas
 
 ROOT = Path(__file__).resolve().parents[1]
 F = "fReceipts"
@@ -119,62 +118,70 @@ RELS = [
 
 STYLE = Style(dark="#0B2545", accent="#1F6FB2", subtitle="#8DB8E8", bg="#EEF3F8",
               palette=["#1F6FB2", "#0B2545", "#8DB8E8", "#E07A1F", "#5FA8A0", "#B8C4D6", "#C8553D"])
-FOOT = "AC Metais · synthetic data · Nov 2025 – Oct 2026"
+FOOT = "AC Metais\nNov 2025 – Oct 2026"
+
+# Layout: dark sidebar on the left (title + filters), content on the right
+SIDE = 232
+X0, WIDE = SIDE + 16, 1280 - SIDE - 32            # content starts at 248, 1016 wide
+CW = (WIDE - 3 * 12) // 4                          # 4 KPI cards
+CX = [X0 + i * (CW + 12) for i in range(4)]
+THIRD = (WIDE - 2 * 12) // 3
+HALF = (WIDE - 12) // 2
 
 
 def pages():
     s = STYLE
     p1 = Page("supplier_performance", "Supplier performance", s)
-    p1.header("Sheet metal intake · Supplier performance",
-              "Are our suppliers delivering on time, complete and to spec?", FOOT)
-    for x, name in zip(CARD_X, ["On-Time %", "Fill Rate %", "Nonconformity Rate %", "Avg Days Late"]):
-        p1.add("card " + name, x, CARD_Y, CARD_W, CARD_H, p1.card(m(name)))
-    p1.add("slicer supplier", *SLICER_1, p1.slicer(col("dSupplier", "supplier"), "Supplier"))
-    p1.add("slicer material", *SLICER_2, p1.slicer(col("dMaterial", "material"), "Material"))
-    p1.add("bar ontime supplier", 16, 186, 404, 250, p1.chart(
+    p1.sidebar("Sheet metal intake", "Supplier performance",
+               "", FOOT, SIDE)
+    p1.add("slicer supplier", 16, 112, SIDE - 32, 84, p1.slicer(col("dSupplier", "supplier"), "Supplier"))
+    p1.add("slicer material", 16, 208, SIDE - 32, 84, p1.slicer(col("dMaterial", "material"), "Material"))
+    p1.add("slicer quarter", 16, 304, SIDE - 32, 84, p1.slicer(col("dCalendar", "quarter"), "Quarter"))
+    for x, name in zip(CX, ["On-Time %", "Fill Rate %", "Nonconformity Rate %", "Avg Days Late"]):
+        p1.add("card " + name, x, 16, CW, 96, p1.card(m(name)))
+    p1.add("bar ontime supplier", X0, 124, THIRD, 276, p1.chart(
         "clusteredBarChart", col("dSupplier", "supplier"), m("On-Time %"),
-        "Who delivers on time? (on-time % by supplier)", sort=m("On-Time %"), fill=s.accent))
-    p1.add("line ontime month", 432, 186, 404, 250, p1.chart(
+        "On-time % by supplier", sort=m("On-Time %"), fill=s.accent))
+    p1.add("line ontime month", X0 + THIRD + 12, 124, THIRD, 276, p1.chart(
         "lineChart", col("dCalendar", "month_label"), m("On-Time %"),
-        "Is it getting better? (on-time % by month)",
-        sort=col("dCalendar", "month_label"), sort_dir="Ascending", fill=s.dark))
-    p1.add("col nonconf type", 848, 186, 416, 250, p1.chart(
-        "clusteredColumnChart", col("fReceipts", "nonconformity"), m("Receipts"),
-        "What goes wrong at the dock? (nonconformities by type)",
-        sort=m("Receipts"), fill="#E07A1F"),
+        "On-time % by month",
+        sort=col("dCalendar", "month_label"), sort_dir="Ascending", fill=s.dark, labels=False))
+    p1.add("col nonconf type", X0 + 2 * (THIRD + 12), 124, THIRD, 276, p1.chart(
+        "clusteredBarChart", col("fReceipts", "nonconformity"), m("Receipts"),
+        "Nonconformities by type", sort=m("Receipts"), fill="#E07A1F"),
         filters=[categorical_filter("fReceipts", "nonconformity",
                                     ["Surface rust / oxidation", "Thickness out of tolerance",
                                      "Wrong dimensions", "Damaged in transport",
                                      "Missing mill certificate"], "p1 nonconf")])
-    p1.add("table scorecard", 16, 448, 1248, 240, p1.table(
-        [col("dSupplier", "supplier"), col("dSupplier", "supplier_type"),
-         col("dSupplier", "promised_lead_time_days"), m("Receipts"), m("On-Time %"),
-         m("Avg Days Late"), m("Fill Rate %"), m("Nonconformity Rate %"), m("Rejection Rate %"),
-         m("Avg Price (BRL/kg)")],
+    p1.add("table scorecard", X0, 412, WIDE, 292, p1.table(
+        [col("dSupplier", "supplier"), col("dSupplier", "supplier_type"), m("Receipts"),
+         m("On-Time %"), m("Avg Days Late"), m("Fill Rate %"), m("Nonconformity Rate %"),
+         m("Rejection Rate %"), m("Avg Price (BRL/kg)")],
         "Supplier scorecard", sort=m("Receipts")))
 
     p2 = Page("spend_and_price", "Spend and price", s)
-    p2.header("Sheet metal intake · Spend and price",
-              "How much are we buying, from whom, and at what price?", FOOT)
-    for x, name in zip(CARD_X, ["Spend (BRL)", "Accepted (t)", "Avg Price (BRL/kg)", "Receipts"]):
-        p2.add("card " + name, x, CARD_Y, CARD_W, CARD_H, p2.card(m(name)))
-    p2.add("slicer material", *SLICER_1, p2.slicer(col("dMaterial", "material"), "Material"))
-    p2.add("slicer quarter", *SLICER_2, p2.slicer(col("dCalendar", "quarter"), "Quarter"))
-    p2.add("line price", 16, 186, 620, 250, p2.chart(
+    p2.sidebar("Sheet metal intake", "Spend and price",
+               "", FOOT, SIDE)
+    p2.add("slicer supplier", 16, 112, SIDE - 32, 84, p2.slicer(col("dSupplier", "supplier"), "Supplier"))
+    p2.add("slicer material", 16, 208, SIDE - 32, 84, p2.slicer(col("dMaterial", "material"), "Material"))
+    p2.add("slicer quarter", 16, 304, SIDE - 32, 84, p2.slicer(col("dCalendar", "quarter"), "Quarter"))
+    for x, name in zip(CX, ["Spend (BRL)", "Accepted (t)", "Avg Price (BRL/kg)", "Receipts"]):
+        p2.add("card " + name, x, 16, CW, 96, p2.card(m(name)))
+    p2.add("line price", X0, 124, HALF, 276, p2.chart(
         "lineChart", col("dCalendar", "month_label"), m("Avg Price (BRL/kg)"),
-        "How are prices moving? (avg BRL/kg by material)", series=col("dMaterial", "material"),
+        "Avg price by material (BRL/kg)", series=col("dMaterial", "material"),
         sort=col("dCalendar", "month_label"), sort_dir="Ascending", labels=False))
-    p2.add("col spend month", 648, 186, 616, 250, p2.chart(
+    p2.add("col spend month", X0 + HALF + 12, 124, HALF, 276, p2.chart(
         "clusteredColumnChart", col("dCalendar", "month_label"), m("Spend (BRL)"),
-        "How much do we spend each month? (BRL)",
+        "Spend by month (BRL)",
         sort=col("dCalendar", "month_label"), sort_dir="Ascending", fill=s.accent, labels=False))
-    p2.add("bar spend supplier", 16, 448, 404, 240, p2.chart(
+    p2.add("donut spend supplier", X0, 412, THIRD, 292, p2.chart(
         "clusteredBarChart", col("dSupplier", "supplier"), m("Spend (BRL)"),
-        "Where does the money go? (spend by supplier)", sort=m("Spend (BRL)"), fill=s.dark))
-    p2.add("table material", 432, 448, 832, 240, p2.table(
+        "Spend by supplier (BRL)", sort=m("Spend (BRL)"), fill=s.dark))
+    p2.add("table material", X0 + THIRD + 12, 412, WIDE - THIRD - 12, 292, p2.table(
         [col("dMaterial", "material_description"), m("Accepted (t)"), m("Spend (BRL)"),
          m("Avg Price (BRL/kg)"), m("Price vs Reference %"), m("On-Time %")],
-        "What do we buy? (by material and thickness)", sort=m("Spend (BRL)")))
+        "Purchases by material and thickness", sort=m("Spend (BRL)")))
     return [p1, p2]
 
 

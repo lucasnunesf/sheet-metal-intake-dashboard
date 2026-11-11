@@ -175,9 +175,11 @@ def proj(field, active=False):
 
 class Style:
     def __init__(self, dark, accent, text="#1F2A36", bg="#F3F4F6", line="#DDE2E8",
-                 subtitle="#BFD4EA", palette=None):
+                 subtitle="#BFD4EA", palette=None, panel="#FFFFFF", muted="#5B6573",
+                 table_header=None, radius=8, shadow=True):
         self.dark, self.accent, self.text, self.bg, self.line = dark, accent, text, bg, line
-        self.subtitle = subtitle
+        self.subtitle, self.panel, self.muted = subtitle, panel, muted
+        self.table_header, self.radius, self.shadow = table_header or dark, radius, shadow
         self.palette = palette or [accent, dark, "#2A9D8F", "#C8553D", "#8D99AE", "#F4B183"]
 
     def container(self, title=None):
@@ -186,19 +188,22 @@ class Style:
             o["title"] = [{"properties": {"show": lit(True), "text": lit(title),
                                           "fontColor": color(self.text), "fontSize": lit(12),
                                           "bold": lit(True)}}]
-        o["background"] = [{"properties": {"show": lit(True), "color": color("#FFFFFF"),
+        o["background"] = [{"properties": {"show": lit(True), "color": color(self.panel),
                                            "transparency": lit(0)}}]
-        o["border"] = [{"properties": {"show": lit(True), "color": color(self.line), "radius": lit(8)}}]
-        o["dropShadow"] = [{"properties": {"show": lit(True), "preset": lit("BottomRight"),
-                                           "transparency": lit(85)}}]
+        o["border"] = [{"properties": {"show": lit(True), "color": color(self.line),
+                                       "radius": lit(self.radius)}}]
+        o["dropShadow"] = [{"properties": {"show": lit(self.shadow)} | (
+            {"preset": lit("BottomRight"), "transparency": lit(85)} if self.shadow else {})}]
         return o
 
     def theme(self, name):
         return {
-            "name": name, "dataColors": self.palette, "background": "#FFFFFF",
-            "foreground": self.text, "tableAccent": self.accent,
+            "name": name, "dataColors": self.palette, "background": self.panel,
+            "foreground": self.text, "foregroundNeutralSecondary": self.muted,
+            "foregroundNeutralTertiary": self.muted, "backgroundLight": self.bg,
+            "backgroundNeutral": self.line, "tableAccent": self.accent,
             "textClasses": {
-                "label": {"fontFace": "Segoe UI", "fontSize": 10, "color": "#3A4452"},
+                "label": {"fontFace": "Segoe UI", "fontSize": 10, "color": self.muted},
                 "title": {"fontFace": "Segoe UI Semibold", "fontSize": 12, "color": self.text},
                 "callout": {"fontFace": "Segoe UI Semibold", "fontSize": 26, "color": self.text},
             },
@@ -233,7 +238,7 @@ class Page:
         return {"visualType": "card",
                 "query": {"queryState": {"Values": {"projections": [proj(measure)]}}},
                 "objects": {"labels": [{"properties": {"color": color(self.s.text), "fontSize": lit(26)}}],
-                            "categoryLabels": [{"properties": {"show": lit(True), "color": color("#5B6573"),
+                            "categoryLabels": [{"properties": {"show": lit(True), "color": color(self.s.muted),
                                                                "fontSize": lit(10)}}]},
                 "visualContainerObjects": self.s.container(), "drillFilterOtherVisuals": True}
 
@@ -241,6 +246,8 @@ class Page:
         return {"visualType": "slicer",
                 "query": {"queryState": {"Values": {"projections": [proj(field, active=True)]}}},
                 "objects": {"data": [{"properties": {"mode": lit("Dropdown")}}],
+                            "items": [{"properties": {"fontColor": color(self.s.text),
+                                                      "background": color(self.s.panel)}}],
                             "header": [{"properties": {"show": lit(True), "text": lit(title),
                                                        "fontColor": color(self.s.text)}}]},
                 "visualContainerObjects": self.s.container(), "drillFilterOtherVisuals": True}
@@ -277,10 +284,34 @@ class Page:
         if sort is not None:
             q["sortDefinition"] = {"sort": [{"field": sort, "direction": sort_dir}], "isDefaultSort": True}
         return {"visualType": "tableEx", "query": q,
-                "objects": {"columnHeaders": [{"properties": {"backColor": color(self.s.dark),
+                "objects": {"columnHeaders": [{"properties": {"backColor": color(self.s.table_header),
                                                               "fontColor": color("#FFFFFF")}}],
+                            "values": [{"properties": {"fontColor": color(self.s.text),
+                                                       "backColor": color(self.s.panel),
+                                                       "fontColorPrimary": color(self.s.text),
+                                                       "backColorPrimary": color(self.s.panel),
+                                                       "fontColorSecondary": color(self.s.text),
+                                                       "backColorSecondary": color(self.s.panel)}}],
                             "grid": [{"properties": {"gridHorizontalColor": color(self.s.line)}}]},
                 "visualContainerObjects": self.s.container(title), "drillFilterOtherVisuals": True}
+
+    def sidebar(self, title, subtitle, question, footer, width=232):
+        """Dark left panel with the title; slicers are placed on top of it by the caller."""
+        self.add("sidebar", 0, 0, width, 720, self.textbox([
+            [(title, {"fontWeight": "bold", "fontSize": "20pt", "color": "#FFFFFF"})],
+            [(subtitle, {"fontWeight": "bold", "fontSize": "12pt", "color": self.s.subtitle})],
+        ] + ([[(" ", {"fontSize": "8pt"})], [(question, {"fontSize": "10pt", "color": "#FFFFFF"})]]
+             if question else []), fill=self.s.dark))
+        self.add("footer", 8, 660, width - 16, 52, self.textbox([
+            [(footer, {"fontSize": "8pt", "color": self.s.subtitle})]]))
+
+    def plain_header(self, title, question, footer):
+        """Title straight on the page background (no band), for dark layouts."""
+        self.add("title", 16, 6, 840, 72, self.textbox([
+            [(title, {"fontWeight": "bold", "fontSize": "20pt", "color": self.s.text})],
+            [(question, {"fontSize": "11pt", "color": self.s.subtitle})]]))
+        self.add("footer", 860, 698, 412, 20, self.textbox([
+            [(footer, {"fontSize": "8pt", "color": self.s.muted})]]))
 
     def header(self, title, question, footer):
         self.add("title", 0, 0, 1280, 64, self.textbox([

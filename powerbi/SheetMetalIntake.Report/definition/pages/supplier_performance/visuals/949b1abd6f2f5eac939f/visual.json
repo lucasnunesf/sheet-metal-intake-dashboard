@@ -2,15 +2,15 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
   "name": "949b1abd6f2f5eac939f",
   "position": {
-    "x": 848,
-    "y": 186,
-    "z": 10000,
-    "height": 250,
-    "width": 416,
-    "tabOrder": 10000
+    "x": 932,
+    "y": 124,
+    "z": 11000,
+    "height": 276,
+    "width": 330,
+    "tabOrder": 11000
   },
   "visual": {
-    "visualType": "clusteredColumnChart",
+    "visualType": "clusteredBarChart",
     "query": {
       "queryState": {
         "Category": {
@@ -115,7 +115,7 @@
       "valueAxis": [
         {
           "properties": {
-            "gridlineShow": {
+            "show": {
               "expr": {
                 "Literal": {
                   "Value": "false"
@@ -140,7 +140,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'What goes wrong at the dock? (nonconformities by type)'"
+                  "Value": "'Nonconformities by type'"
                 }
               }
             },

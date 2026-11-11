@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
   "name": "936379b9f6805e2f9d2c",
   "position": {
-    "x": 16,
-    "y": 186,
-    "z": 8000,
-    "height": 250,
-    "width": 404,
-    "tabOrder": 8000
+    "x": 248,
+    "y": 124,
+    "z": 9000,
+    "height": 276,
+    "width": 330,
+    "tabOrder": 9000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -140,7 +140,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Who delivers on time? (on-time % by supplier)'"
+                  "Value": "'On-time % by supplier'"
                 }
               }
             },

@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
   "name": "bbfa965214b65bbfac0c",
   "position": {
-    "x": 432,
-    "y": 448,
-    "z": 11000,
-    "height": 240,
-    "width": 832,
-    "tabOrder": 11000
+    "x": 590,
+    "y": 412,
+    "z": 12000,
+    "height": 292,
+    "width": 674,
+    "tabOrder": 12000
   },
   "visual": {
     "visualType": "tableEx",
@@ -150,6 +150,78 @@
           }
         }
       ],
+      "values": [
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#1F2A36'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontColorPrimary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#1F2A36'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColorPrimary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontColorSecondary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#1F2A36'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColorSecondary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "grid": [
         {
           "properties": {
@@ -182,7 +254,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'What do we buy? (by material and thickness)'"
+                  "Value": "'Purchases by material and thickness'"
                 }
               }
             },

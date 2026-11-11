@@ -11,12 +11,16 @@
   ],
   "background": "#FFFFFF",
   "foreground": "#1F2A36",
+  "foregroundNeutralSecondary": "#5B6573",
+  "foregroundNeutralTertiary": "#5B6573",
+  "backgroundLight": "#EEF3F8",
+  "backgroundNeutral": "#DDE2E8",
   "tableAccent": "#1F6FB2",
   "textClasses": {
     "label": {
       "fontFace": "Segoe UI",
       "fontSize": 10,
-      "color": "#3A4452"
+      "color": "#5B6573"
     },
     "title": {
       "fontFace": "Segoe UI Semibold",

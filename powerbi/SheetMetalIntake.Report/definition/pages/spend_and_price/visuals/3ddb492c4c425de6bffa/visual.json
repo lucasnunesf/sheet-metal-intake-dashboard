@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
   "name": "3ddb492c4c425de6bffa",
   "position": {
-    "x": 648,
-    "y": 186,
-    "z": 9000,
-    "height": 250,
-    "width": 616,
-    "tabOrder": 9000
+    "x": 762,
+    "y": 124,
+    "z": 10000,
+    "height": 276,
+    "width": 502,
+    "tabOrder": 10000
   },
   "visual": {
     "visualType": "clusteredColumnChart",
@@ -116,7 +116,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'How much do we spend each month? (BRL)'"
+                  "Value": "'Spend by month (BRL)'"
                 }
               }
             },

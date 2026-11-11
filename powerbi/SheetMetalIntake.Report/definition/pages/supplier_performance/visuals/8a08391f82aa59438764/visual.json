@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
   "name": "8a08391f82aa59438764",
   "position": {
-    "x": 16,
-    "y": 448,
-    "z": 11000,
-    "height": 240,
-    "width": 1248,
-    "tabOrder": 11000
+    "x": 248,
+    "y": 412,
+    "z": 12000,
+    "height": 292,
+    "width": 1016,
+    "tabOrder": 12000
   },
   "visual": {
     "visualType": "tableEx",
@@ -42,20 +42,6 @@
               },
               "queryRef": "dSupplier.supplier_type",
               "nativeQueryRef": "supplier_type"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "dSupplier"
-                    }
-                  },
-                  "Property": "promised_lead_time_days"
-                }
-              },
-              "queryRef": "dSupplier.promised_lead_time_days",
-              "nativeQueryRef": "promised_lead_time_days"
             },
             {
               "field": {
@@ -193,6 +179,78 @@
               }
             },
             "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#1F2A36'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontColorPrimary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#1F2A36'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColorPrimary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontColorSecondary": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#1F2A36'"
+                    }
+                  }
+                }
+              }
+            },
+            "backColorSecondary": {
               "solid": {
                 "color": {
                   "expr": {

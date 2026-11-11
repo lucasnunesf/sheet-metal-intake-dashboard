@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
-  "name": "dee4fd9e8f7b5c5fa4f5",
+  "name": "f73e6893efc456269bf4",
   "position": {
-    "x": 16,
-    "y": 448,
-    "z": 10000,
-    "height": 240,
-    "width": 404,
-    "tabOrder": 10000
+    "x": 248,
+    "y": 412,
+    "z": 11000,
+    "height": 292,
+    "width": 330,
+    "tabOrder": 11000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -140,7 +140,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Where does the money go? (spend by supplier)'"
+                  "Value": "'Spend by supplier (BRL)'"
                 }
               }
             },
