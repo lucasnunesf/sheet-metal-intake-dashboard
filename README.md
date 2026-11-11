@@ -243,6 +243,12 @@ docs/                             case study and README images
 - Add the cost of a late delivery (hours of laser idle or overtime) to the scorecard, so the cheapest supplier can be compared on total cost.
 - Alert purchasing when a supplier's on-time rate drops below a target for two months in a row.
 
+## How this was built
+
+The problem, the business rules and the design decisions are mine. They come from my BI work at AC Metais. I used an AI coding assistant to write the code faster and reviewed the result.
+
+<!-- Lucas: write here, in your own words, one or two sentences about where you saw this problem happen. -->
+
 ## Author
 
 Lucas Fernandes Nunes · [Portfolio](https://lucasnunesf.notion.site) · [GitHub](https://github.com/lucasnunesf)
