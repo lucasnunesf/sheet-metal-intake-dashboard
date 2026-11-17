@@ -13,7 +13,7 @@ A Power BI dashboard for goods receiving of steel, stainless and aluminum sheets
 |---|---|
 | **Result** | The mill-direct source is 10–12% cheaper per kg of carbon steel but on time only 64% of the time, against 95% for the best service center. Rust problems are 3.8× more frequent in the rainy months. |
 | **My role** | I worked with BI at AC Metais, a Brazilian laser cutting and metal fabrication company. This repository rebuilds a receiving use case from that shop with synthetic data: data generator, data model, DAX, report pages, tests. |
-| **What's here** | A Power BI project (`.pbip`) written by Python and published to the Power BI Service: 4 tables, 12 DAX measures, 2 pages, 26 visuals. A data generator, a pandas check of the numbers, 23 automated tests, CI on every commit. |
+| **What's here** | A Power BI project (`.pbip`) written by Python and published to the Power BI Service: 4 tables, 12 DAX measures, 2 pages, 26 visuals. A data generator, a pandas check of the numbers, 26 automated tests, CI on every commit. |
 | **Skills** | Power BI, DAX, Power Query (M), star schema, weighted averages, supplier scorecards, TMDL / PBIR, Python (pandas), pytest, GitHub Actions |
 | **Full case** | [docs/case-study.md](docs/case-study.md) |
 
@@ -195,7 +195,7 @@ pytest
 ```
 
 ```
-============================== 23 passed in 2.81s ==============================
+============================== 26 passed in 2.81s ==============================
 ```
 
 | File | What it checks |
@@ -244,4 +244,4 @@ The problem, the business rules and the design decisions are mine. They come fro
 
 ## Author
 
-Lucas Fernandes Nunes · [Portfolio](https://lucasnunesf.notion.site) · [GitHub](https://github.com/lucasnunesf)
+Lucas Fernandes Nunes · [Portfolio](https://lucasnunesf.notion.site/Lucas-Nunes-Data-BI-Analyst-3de917c89c178092885cf639b619767b) · [GitHub](https://github.com/lucasnunesf)
